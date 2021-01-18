@@ -1,8 +1,11 @@
 const express = require('express');
+const cors = require('cors');
+// const bcrypt = require('bcrypt');
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 const database = {
     users: [
@@ -38,10 +41,11 @@ app.post('/register', (req, res, next) => {
 })
 
 app.post('/signin', (req, res, next) => {
+
     if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-        res.send('success');
+        res.json('success');
     } else {
-        res.status(400).send('signing failed');
+        res.status(400).json('signing failed');
     }
 })
 
