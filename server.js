@@ -45,7 +45,7 @@ app.post('/signin', (req, res, next) => {
     if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
         res.json('success');
     } else {
-        res.status(400).json('signing failed');
+        res.status(400).json('signin failed');
     }
 })
 
