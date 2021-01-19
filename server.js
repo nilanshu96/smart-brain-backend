@@ -37,13 +37,16 @@ app.post('/register', (req, res, next) => {
 
     database.users.push(newUser);
 
-    res.send(newUser);
+    const newUserResponse = {...newUser};
+    delete newUserResponse.password;
+
+    res.send(newUserResponse);
 })
 
 app.post('/signin', (req, res, next) => {
 
     if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-        res.json('success');
+        res.json(database.users[0]);
     } else {
         res.status(400).json('signin failed');
     }
@@ -66,7 +69,7 @@ app.get('/profile/:id', (req, res) => {
     }
 })
 
-app.post('/image', (req, res) => {
+app.put('/image', (req, res) => {
 
     const { id } = req.body;
     let found = false;
