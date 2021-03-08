@@ -4,13 +4,13 @@ const bcrypt = require('bcrypt');
 const morgan = require('morgan');
 let knex;
 
-const { DB_USER, DB_PASSWORD, DB_NAME, PORT, NODE_ENV } = process.env;
+const { DB_USER, DB_HOST, DB_PASSWORD, DB_NAME, PORT, NODE_ENV } = process.env;
 
 if (NODE_ENV === 'development') {
     knex = require('knex')({
         client: 'pg',
         connection: {
-            host: '127.0.0.1',
+            host: DB_HOST,
             user: DB_USER,
             password: DB_PASSWORD,
             database: DB_NAME
