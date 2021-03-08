@@ -1,0 +1,12 @@
+services:
+  smart-brain-backend:
+    container_name: backend
+    build: ./
+    command: npm run start:dev
+    working_dir: /usr/src/smart-brain-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/usr/src/smart-brain-backend
+    environment: 
+      - NODE_ENV=development

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const morgan = require('morgan');
 let knex;
 
 const { DB_USER, DB_PASSWORD, DB_NAME, PORT, NODE_ENV } = process.env;
@@ -34,11 +35,15 @@ const image = require('./controllers/image');
 
 const app = express();
 
+if (NODE_ENV === 'development') {
+    app.use(morgan('combined'));
+}
+
 app.use(express.json());
 app.use(cors());
 
 app.get('/', (req, res, next) => {
-    res.send('work in progress');
+    res.send('hello');
 })
 
 app.post('/register', register.handleRegister(knex, bcrypt));
