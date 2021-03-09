@@ -14,7 +14,7 @@ services:
   
   #postgres database
   postgres:
-      image: postgres
+      build: ./postgres/
       env_file: 
         - ./postgres.env
       ports: 
