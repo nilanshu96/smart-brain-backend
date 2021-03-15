@@ -52,6 +52,8 @@ app.post('/signin', signin.handleSignIn(knex, bcrypt));
 
 app.get('/profile/:id', profile.handleProfileGet(knex));
 
+app.post('/profile/:id', profile.handleProfileEdit(knex));
+
 app.put('/image', image.handleImage(knex));
 
 app.post('/imageurl', image.handleImageUrl);
