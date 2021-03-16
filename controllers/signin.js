@@ -1,12 +1,12 @@
-const handleSignIn = (knex, bcrypt) => (req, res) => {
+const handleSignIn = (knex, bcrypt, req) => {
 
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json("Invalid form submission");
+        return Promise.reject("Invalid form submission");
     }
 
-    knex('login')
+    return knex('login')
         .select('email', 'hash')
         .where('email', '=', email)
         .then(user => {
@@ -18,19 +18,34 @@ const handleSignIn = (knex, bcrypt) => (req, res) => {
                     const users = await knex('users')
                         .select('*')
                         .where('email', '=', email);
-                    res.json(users[0]);
+                    return users[0];
                 } catch (err) {
-                    res.status(400).json('Failed to fetch the user');
+                    return Promise.reject({ type: 'SIGNIN_ERROR', msg: 'Failed to fetch the user' });
                 }
             } else {
-                res.status(400).json('Invalid credentials');
+                return Promise.reject({ type: 'SIGNIN_ERROR', msg: 'Invalid credentials' });
             }
         })
         .catch(err => {
-            res.status(400).json('failed to login');
+            if (err.type === 'SIGNIN_ERROR') {
+                return Promise.reject(err.msg);
+            } else {
+                return Promise.reject('failed to login');
+            }
         })
 }
 
+const signinAuthentication = (knex, bcrypt) => (req, res) => {
+    const { authorization } = req.headers;
+    return authorization ?
+        getAuthInfo() :
+        handleSignIn(knex, bcrypt, req)
+            .then(data => res.json(data))
+            .catch(err => {
+                res.status(400).json(err)
+            });
+}
+
 module.exports = {
-    handleSignIn: handleSignIn
+    signinAuthentication: signinAuthentication
 }

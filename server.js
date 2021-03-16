@@ -48,7 +48,7 @@ app.get('/', (req, res, next) => {
 
 app.post('/register', register.handleRegister(knex, bcrypt));
 
-app.post('/signin', signin.handleSignIn(knex, bcrypt));
+app.post('/signin', signin.signinAuthentication(knex, bcrypt));
 
 app.get('/profile/:id', profile.handleProfileGet(knex));
 
