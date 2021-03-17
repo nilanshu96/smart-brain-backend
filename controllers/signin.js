@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const handleSignIn = (knex, bcrypt, req) => {
 
     const { email, password } = req.body;
@@ -35,12 +37,28 @@ const handleSignIn = (knex, bcrypt, req) => {
         })
 }
 
+const createToken = (email) => {
+    const payload = { email };
+    const token = jwt.sign(payload, process.env.JWT_SECRET);
+    return token;
+}
+
+const createSessions = (user) => {
+
+    const { email, id } = user;
+    const token = createToken(email);
+    return { success: 'true', userid: id, token };
+}
+
 const signinAuthentication = (knex, bcrypt) => (req, res) => {
     const { authorization } = req.headers;
     return authorization ?
         getAuthInfo() :
         handleSignIn(knex, bcrypt, req)
-            .then(data => res.json(data))
+            .then(data => {
+                return data.id && data.email ? createSessions(data) : Promise.reject(data);
+            })
+            .then(session => res.json(session))
             .catch(err => {
                 res.status(400).json(err)
             });
