@@ -1,4 +1,13 @@
 const jwt = require('jsonwebtoken');
+const redis = require('redis');
+const { promisify } = require('util');
+
+const redisClient = redis.createClient({ host: 'redis' });
+
+const redisClientAsync = {
+    set: promisify(redisClient.set).bind(redisClient),
+    get: promisify(redisClient.get).bind(redisClient)
+}
 
 const handleSignIn = (knex, bcrypt, req) => {
 
@@ -37,6 +46,10 @@ const handleSignIn = (knex, bcrypt, req) => {
         })
 }
 
+const setToken = (token, id) => {
+    return redisClientAsync.set(token, id);
+}
+
 const createToken = (email) => {
     const payload = { email };
     const token = jwt.sign(payload, process.env.JWT_SECRET);
@@ -47,13 +60,35 @@ const createSessions = (user) => {
 
     const { email, id } = user;
     const token = createToken(email);
-    return { success: 'true', userid: id, token };
+    return setToken(token, id)
+        .then(() => {
+            return { success: 'true', userid: id, token };
+        })
+        .catch(console.log);
+}
+
+const getAuthInfo = (authorization) => {
+    
+    return redisClientAsync.get(authorization)
+        .then(reply => {
+            if (!reply) {
+                return Promise.reject('Auth token expired');
+            } else {
+                return { id: reply }
+            }
+        })
+        .catch(err => Promise.reject(err));
 }
 
 const signinAuthentication = (knex, bcrypt) => (req, res) => {
     const { authorization } = req.headers;
+    
     return authorization ?
-        getAuthInfo() :
+        getAuthInfo(authorization)
+            .then(data => res.json(data))
+            .catch(err => {
+                res.status(400).json(err);
+            }) :
         handleSignIn(knex, bcrypt, req)
             .then(data => {
                 return data.id && data.email ? createSessions(data) : Promise.reject(data);
