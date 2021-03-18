@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const morgan = require('morgan');
 let knex;
 
+const { requireAuth } = require('./middlewares/authorization');
+
 const { DB_USER, DB_HOST, DB_PASSWORD, DB_NAME, PORT, NODE_ENV } = process.env;
 
 if (NODE_ENV === 'development') {
@@ -50,13 +52,13 @@ app.post('/register', register.handleRegister(knex, bcrypt));
 
 app.post('/signin', signin.signinAuthentication(knex, bcrypt));
 
-app.get('/profile/:id', profile.handleProfileGet(knex));
+app.get('/profile/:id', requireAuth, profile.handleProfileGet(knex));
 
-app.post('/profile/:id', profile.handleProfileEdit(knex));
+app.post('/profile/:id', requireAuth, profile.handleProfileEdit(knex));
 
-app.put('/image', image.handleImage(knex));
+app.put('/image', requireAuth, image.handleImage(knex));
 
-app.post('/imageurl', image.handleImageUrl);
+app.post('/imageurl', requireAuth, image.handleImageUrl);
 
 app.listen(PORT, () => {
     console.log(`listening to port ${PORT}`);

@@ -1,13 +1,6 @@
 const jwt = require('jsonwebtoken');
-const redis = require('redis');
-const { promisify } = require('util');
 
-const redisClient = redis.createClient({ host: 'redis' });
-
-const redisClientAsync = {
-    set: promisify(redisClient.set).bind(redisClient),
-    get: promisify(redisClient.get).bind(redisClient)
-}
+const redisClient = require('../database/redis-client');
 
 const handleSignIn = (knex, bcrypt, req) => {
 
@@ -47,7 +40,7 @@ const handleSignIn = (knex, bcrypt, req) => {
 }
 
 const setToken = (token, id) => {
-    return redisClientAsync.set(token, id);
+    return redisClient.set(token, id);
 }
 
 const createToken = (email) => {
@@ -69,7 +62,7 @@ const createSessions = (user) => {
 
 const getAuthInfo = (authorization) => {
     
-    return redisClientAsync.get(authorization)
+    return redisClient.get(authorization)
         .then(reply => {
             if (!reply) {
                 return Promise.reject('Auth token expired');
