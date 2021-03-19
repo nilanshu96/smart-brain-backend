@@ -23,11 +23,17 @@ const handleProfileEdit = (knex) => (req, res) => {
 
     const { id } = req.params;
 
-    const { name } = req.body.formInput;
+    const { name, age } = req.body.formInput;
 
+    const query = knex('users')
+    .where({ id })
+    .update({ name, age })
+    .toSQL().toNative();
+    console.log(query);
+    
     knex('users')
         .where({ id })
-        .update({ name })
+        .update({ name, age })
         .then(resp => {
             if (resp) {
                 res.json("success")
