@@ -2,8 +2,14 @@ const jwt = require('jsonwebtoken');
 
 const redisClient = require('../database/redis-client');
 
+const TOKEN_EXPIRE_TIME = 7200;
+
 const setToken = (token, id) => {
     return redisClient.set(token, id);
+}
+
+const setTokenExpiry = (token, time = TOKEN_EXPIRE_TIME) => {
+    return redisClient.expire(token, time);
 }
 
 const createToken = (email) => {
@@ -17,6 +23,9 @@ const createSession = (user) => {
     const { email, id } = user;
     const token = createToken(email);
     return setToken(token, id)
+        .then(() => {
+            return setTokenExpiry(token);
+        })
         .then(() => {
             return { success: 'true', userid: id, token };
         })
