@@ -2,36 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const morgan = require('morgan');
-let knex;
 
+const knex = require('./database/postgres-client');
 const { requireAuth } = require('./middlewares/authorization');
 
-const { DB_USER, DB_HOST, DB_PASSWORD, DB_NAME, PORT, NODE_ENV } = process.env;
+const { PORT, NODE_ENV } = process.env;
 
-if (NODE_ENV === 'development') {
-    knex = require('knex')({
-        client: 'pg',
-        connection: {
-            host: DB_HOST,
-            user: DB_USER,
-            password: DB_PASSWORD,
-            database: DB_NAME
-        }
-    });
-} else if (NODE_ENV === 'production') {
-    knex = require('knex')({
-        client: 'pg',
-        connection: {
-            connectionString: process.env.DATABASE_URL,
-            ssl: {
-                rejectUnauthorized: false
-            }
-        }
-    });
-}
 
 const register = require('./controllers/register');
 const signin = require('./controllers/signin');
+const signout = require('./controllers/signout');
 const profile = require('./controllers/profile');
 const image = require('./controllers/image');
 
@@ -51,6 +31,8 @@ app.get('/', (req, res, next) => {
 app.post('/register', register.handleRegister(knex, bcrypt));
 
 app.post('/signin', signin.signinAuthentication(knex, bcrypt));
+
+app.get('/signout', signout.handleSignOut);
 
 app.get('/profile/:id', requireAuth, profile.handleProfileGet(knex));
 

@@ -1,8 +1,10 @@
+const { createSession } = require('../util/session-manager');
+
 const handleRegister = (knex, bcrypt) => (req, res) => {
 
     const { name, email, password } = req.body;
 
-    if(!name || !email || !password) {
+    if (!name || !email || !password) {
         return res.status(400).json("Invalid form submission");
     }
 
@@ -23,10 +25,18 @@ const handleRegister = (knex, bcrypt) => (req, res) => {
             })
             .returning('*');
     }).then(users => {
-        res.json(users[0])
-    }).catch(err => {
-        res.status(400).json("unable to register");
-    })
+        return users[0];
+    }).then(user => {
+        if (user) {
+            return createSession(user);
+        } else {
+            return Promise.reject('Failed to fetch the user');
+        }
+    }).then(session => res.json(session))
+        .catch(err => {
+            console.log(err);
+            res.status(400).json("unable to register");
+        })
 
 }
 

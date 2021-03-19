@@ -5,7 +5,8 @@ const redisClient = redis.createClient({ host: 'redis' });
 
 const redisClientAsync = {
     set: promisify(redisClient.set).bind(redisClient),
-    get: promisify(redisClient.get).bind(redisClient)
+    get: promisify(redisClient.get).bind(redisClient),
+    del: promisify(redisClient.del).bind(redisClient)
 }
 
 module.exports = redisClientAsync;
